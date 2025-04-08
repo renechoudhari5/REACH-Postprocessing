@@ -67,7 +67,8 @@ View(unexpected) # all assessments with unexpected # of occurrences
 # to_review <- dat_flow %>% filter(secret_user_id %in% to_review_ids) %>%
 #   select(-c("userId", "event_id", "id")) # full data for the participants to review
 # View(to_review)
-# # this_id <- to_review %>% filter(secret_user_id == "2217-001") # focusing on one subject
+this_id <- dat_flow %>% filter(secret_user_id == "2165-001") # focusing on one subject
+View(this_id)
 
 # CATCHING ERRORS
 
@@ -85,6 +86,7 @@ View(empty_dates)
 # manual review of dates that are truly incorrect
 incorrect_dates <- empty_dates %>% filter(
   (secret_user_id == "2136-001" & date == "2024-08-05") |
+    (secret_user_id == "2133-001" & between(date, as.Date("2025-02-22"),as.Date("2025-02-25"))) |
     (secret_user_id == "2137-001" & date == "2024-08-16") |
     (secret_user_id == "2143-002" & date == "2024-09-11") |
     (secret_user_id == "2146-001" & date == "2024-08-05") |
@@ -94,15 +96,17 @@ incorrect_dates <- empty_dates %>% filter(
     (secret_user_id == "2161-001" & date == "2024-10-31") |
     (secret_user_id == "2161-001" & date == "2024-12-21") |
     (secret_user_id == "2184-048" & date == "2024-12-12") |
-    #(secret_user_id == "2190-001" & between(date, as.Date("2025-02-07"),as.Date("2025-02-10"))) |
+    (secret_user_id == "2190-001" & between(date, as.Date("2025-02-07"),as.Date("2025-02-10"))) |
     (secret_user_id == "2192-001" & date == "2024-08-30") |
     (secret_user_id == "2192-002" & date == "2024-08-30") |
     (secret_user_id == "2200-001" & between(date, as.Date("2024-09-21"),as.Date("2024-10-03"))) |
     (secret_user_id == "2205-001" & date == "2025-01-18") |
     (secret_user_id == "2208-002" & date == "2024-08-28") |
     (secret_user_id == "2212-001" & between(date, as.Date("2024-09-04"),as.Date("2024-09-09"))) |
+    (secret_user_id == "2214-001" & between(date, as.Date("2025-02-28"),as.Date("2025-03-04"))) |
     (secret_user_id == "2217-001" & between(date, as.Date("2024-11-06"),as.Date("2024-11-20"))) |
     (secret_user_id == "2217-001" & between(date, as.Date("2024-12-28"),as.Date("2024-12-31"))) |
+    (secret_user_id == "2243-001" & between(date, as.Date("2025-04-01"),as.Date("2025-04-02"))) |
     (secret_user_id == "2248-001" & date == "2025-02-06")
 )
 View(incorrect_dates)
@@ -114,7 +118,7 @@ dat_clean <- dat_flow %>% anti_join(incorrect_dates)
 
 # 2. Finding duplicate assessments: checks that no assessment appears more than once per day
 
-duplicates <- dat_flow %>% 
+duplicates <- dat_clean %>% 
   group_by(secret_user_id, date, activity_flow) %>%
   mutate(repeats = n()) %>%
   filter(repeats != 1) %>%
@@ -139,7 +143,7 @@ duplicates_to_remove <- duplicates %>% filter(
     (secret_user_id == "2215-001" & schedule_Time == as.POSIXct("2024-11-07 23:00:00", tz = "UTC") & is.na(start_Time)) |
     (secret_user_id == "2215-001" & schedule_Time == as.POSIXct("2024-11-08 23:00:00", tz = "UTC") & is.na(start_Time)) |
     (secret_user_id == "2215-001" & schedule_Time == as.POSIXct("2024-11-09 23:00:00", tz = "UTC") & is.na(start_Time)) |
-    (secret_user_id == "2215-001" & schedule_Time == as.POSIXct("2024-11-10 23:00:00", tz = "UTC") & event_id == "82c22b15-a3f4-41e7-ae6b-7ebe12fa720c") |
+    (secret_user_id == "2215-001" & schedule_Time == as.POSIXct("2024-11-10 23:00:00", tz = "UTC") & activity_schedule_id == "82c22b15-a3f4-41e7-ae6b-7ebe12fa720c") |
     (secret_user_id == "2215-001" & schedule_Time == as.POSIXct("2024-11-11 23:00:00", tz = "UTC") & is.na(start_Time)) |
     (secret_user_id == "2215-001" & schedule_Time == as.POSIXct("2024-11-12 23:00:00", tz = "UTC") & is.na(start_Time)) |
     (secret_user_id == "2215-001" & schedule_Time == as.POSIXct("2024-11-13 23:00:00", tz = "UTC") & is.na(start_Time)) |
@@ -159,7 +163,8 @@ duplicates_to_remove <- duplicates %>% filter(
     (secret_user_id == "2232-001" & schedule_Time == as.POSIXct("2024-10-10 21:00:00", tz = "UTC")) |
     (secret_user_id == "2248-001" & schedule_Time == as.POSIXct("2024-11-26 23:00:00", tz = "UTC")) |
     (secret_user_id == "2248-001" & schedule_Time == as.POSIXct("2024-11-27 23:00:00", tz = "UTC")) |
-    (secret_user_id == "2248-001" & schedule_Time == as.POSIXct("2024-11-28 17:30:00", tz = "UTC"))
+    (secret_user_id == "2248-001" & schedule_Time == as.POSIXct("2024-11-28 17:30:00", tz = "UTC")) |
+    (secret_user_id == "2260-001" & schedule_Time == as.POSIXct("2025-03-17 11:00:00", tz = "UTC"))
   )
 View(duplicates_to_remove)
 
@@ -170,7 +175,7 @@ dat_clean <- dat_clean %>% anti_join(duplicates_to_remove)
 
 # 3. Finding unscheduled assessments: checks that all assessments have scheduled dates
 
-unscheduled <- dat_flow %>%
+unscheduled <- dat_clean %>%
   group_by(secret_user_id) %>%
   filter(is.na(date)) %>%
   mutate(unscheduled_assessments = "yes")
@@ -209,8 +214,8 @@ find_missing_random <- function(data, saliva_value, mandatory_assessments, eveni
     mutate(missing_random = "yes")
 }
 
-EMA_missing_random <- find_missing_random(dat_flow, 0, EMA_mandatory_assessments, EMA_evening_options)
-saliva_missing_random <- find_missing_random(dat_flow, 1, saliva_mandatory_assessments, saliva_evening_options)
+EMA_missing_random <- find_missing_random(dat_clean, 0, EMA_mandatory_assessments, EMA_evening_options)
+saliva_missing_random <- find_missing_random(dat_clean, 1, saliva_mandatory_assessments, saliva_evening_options)
 missing_random <- bind_rows(EMA_missing_random, saliva_missing_random) %>%
   arrange(secret_user_id, date) %>%
   select(-c("has_evening","mult_evening"))
@@ -220,7 +225,8 @@ length(unique(missing_random$secret_user_id)) # num of participants w missing an
 
 # manual review of random assessments to be removed
 random_to_remove <- missing_random %>% filter(
-  (secret_user_id == "2216-001" & date == "2025-01-04") |
+  (secret_user_id == "2214-001" & date == "2025-02-08") |
+    (secret_user_id == "2216-001" & date == "2025-01-04") |
     (secret_user_id == "2216-001" & date == "2025-01-11") |
     (secret_user_id == "2217-001" & date == "2024-12-12")
 )
@@ -231,9 +237,13 @@ dat_clean <- dat_clean %>% anti_join(random_to_remove)
 # manually flagging the missing assessments in the dataset
 dat_clean <- dat_clean %>%
   mutate(flag_missing_assessments = ifelse(
+    (secret_user_id == "2146-012" & date == "2025-02-28") |
     (secret_user_id == "2216-001" & date == "2024-12-21") |
           (secret_user_id == "2216-001" & date == "2024-12-22") |
-          (secret_user_id == "2216-001" & date == "2024-12-29"), 1, 0))
+          (secret_user_id == "2216-001" & date == "2024-12-29") |
+          (secret_user_id == "2220-001" & between(date, as.Date("2025-03-06"),as.Date("2025-03-09"))) |
+          (secret_user_id == "2260-001" & date == "2025-03-13") |
+          (secret_user_id == "2264-001" & date == "2025-04-06"), 1, 0))
 
 # 6. Finding long assessments: checks that all assessments were finished in <= 1hour (after other cleaning is done)
 
@@ -260,7 +270,7 @@ dat_clean <- dat_clean %>%
 # ---> Clean data sets
 View(dat_clean)
 glimpse(dat_clean)
-# write_csv(dat_clean, "dat_clean.csv")
+# write_csv(dat_clean, "dat_clean_4.8.csv")
 
 ema_clean <- dat_clean %>% filter(saliva == 0) # EMA only
 saliva_clean <- dat_clean %>% filter(saliva == 1) # saliva only
@@ -292,11 +302,8 @@ number_forcomp = length(unique(ema_clean_forcomp$secret_user_id))
 ## What is the total compliance of the sample?
 total_compliance = 1 - sum(ema_clean_forcomp$missed)/nrow(ema_clean_forcomp)
 
-## What is the total compliance for completed assessments?
+## What is the total compliance for completed assessments?/What percent of assessments are fully completed?
 complete_compliance = nrow(ema_complete_forcomp)/nrow(ema_clean_forcomp)
-
-## What percent of assessments are fully completed?
-prop_complete = nrow(ema_complete_forcomp)/nrow(ema_clean_forcomp) 
 
 ## On average, how long does it take participants to complete the EMA, in minutes?
 summary(ema_clean_forcomp$duration/60) # all surveys
