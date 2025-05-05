@@ -5,11 +5,18 @@ library(stringr)
 
 ------- # IMPORTING DATA 
 ## Reading in flow data
-dat_flow <- read_csv("NIMH EMA Data/Output Files/flow_final.csv")
+master <- read_csv("NIMH EMA Data/Output Files/5-2-25/flow_final.csv")
+
+## Reading in previous flow data and aligning var types
+prev_flow <- read_csv("NIMH EMA Data/Output Files/4-7-25/flow_final.csv")
 
 ## Remove admin entries
-dat_flow = dat_flow[!(dat_flow$secret_user_id %in% c("9999-999", "[admin account] (2628b895-18fa-4cf3-a2b4-ec7253aabde4)",
+master = master[!(master$secret_user_id %in% c("9999-999", "[admin account] (2628b895-18fa-4cf3-a2b4-ec7253aabde4)",
                                                                  "[admin account] (a97ac66e-d8da-4427-bfd5-7e4df4059f05)")),]
+
+## Removing all entries that were in previous export
+dat_flow = anti_join(master, prev_flow, by = c("userId", "activity_schedule_id", "activity_submission_id", "secret_user_id", "schedule_Time"))
+
 ------- # METADATA VARIABLE CREATION
 
 ## Identify missed entries (no start time)
@@ -33,44 +40,10 @@ View(dat_flow)
 glimpse(dat_flow)
 
 ------- # CLEANING
-  
-# NUMBER OF ASSESSMENTS
-  # Expected total number of assessments for EMA: 60
-  # Expected total number of assessments for EMA + saliva: 76
-  # Expected number of normal Morning, Mid-Day, Afternoon, and Evening: 15
-  # Expected number of each assessment with saliva: 4
-  
-assessments <- dat_flow %>% # number of each type of assessment for each participant
-  group_by(secret_user_id, activity_flow) %>% 
-  summarise(n=n()) %>%
-  arrange(n) %>%
-  ungroup()
-View(assessments)
 
-## Which subjects don't have the expected number of assessments?
-
-unexpected <- assessments %>% filter(activity_flow == "Morning Assessment" & n != 15 |
-                         activity_flow == "Mid-day Assessment" & n != 15 |
-                         activity_flow == "Afternoon Assessment" & n != 15 |
-                         activity_flow == "Evening Assessment" & n != 15 |
-                         activity_flow == "Evening Assessment (Female)" & n != 15 |
-                         activity_flow == "Morning Assessment (with saliva)" & n != 4 |
-                         activity_flow == "Mid-day Assessment (with saliva)" & n != 4 |
-                         activity_flow == "Afternoon Assessment (with saliva)" & n != 4 |
-                         activity_flow == "Evening Assessment (with saliva)" & n != 4 |
-                         activity_flow == "Evening Assessment (Female; with saliva)" & n != 4) %>%
-  arrange(secret_user_id)
-View(unexpected) # all assessments with unexpected # of occurrences
-
-# to_review_ids <- unique(unexpected$secret_user_id) # participant IDs to review
-# 
-# to_review <- dat_flow %>% filter(secret_user_id %in% to_review_ids) %>%
-#   select(-c("userId", "event_id", "id")) # full data for the participants to review
-# View(to_review)
-this_id <- dat_flow %>% filter(secret_user_id == "2165-001") # focusing on one subject
+## To reference a participant's full dataset: 
+this_id <- prev_cleaned %>% filter(secret_user_id == "2179-001") # focusing on one subject
 View(this_id)
-
-# CATCHING ERRORS
 
 # 1. Finding empty dates: checks for a full day of missed data
 
@@ -164,7 +137,9 @@ duplicates_to_remove <- duplicates %>% filter(
     (secret_user_id == "2248-001" & schedule_Time == as.POSIXct("2024-11-26 23:00:00", tz = "UTC")) |
     (secret_user_id == "2248-001" & schedule_Time == as.POSIXct("2024-11-27 23:00:00", tz = "UTC")) |
     (secret_user_id == "2248-001" & schedule_Time == as.POSIXct("2024-11-28 17:30:00", tz = "UTC")) |
-    (secret_user_id == "2260-001" & schedule_Time == as.POSIXct("2025-03-17 11:00:00", tz = "UTC"))
+    (secret_user_id == "2260-001" & schedule_Time == as.POSIXct("2025-03-17 11:00:00", tz = "UTC")) |
+    (secret_user_id == "2127-002" & schedule_Time == as.POSIXct("2025-04-18 16:30:00", tz = "UTC")) |
+    (secret_user_id == "2127-002" & schedule_Time == as.POSIXct("2025-04-18 20:30:00", tz = "UTC"))
   )
 View(duplicates_to_remove)
 
@@ -228,7 +203,9 @@ random_to_remove <- missing_random %>% filter(
   (secret_user_id == "2214-001" & date == "2025-02-08") |
     (secret_user_id == "2216-001" & date == "2025-01-04") |
     (secret_user_id == "2216-001" & date == "2025-01-11") |
-    (secret_user_id == "2217-001" & date == "2024-12-12")
+    (secret_user_id == "2217-001" & date == "2024-12-12") |
+    (secret_user_id == "2243-001" & between(date, as.Date("2025-04-19"),as.Date("2025-05-02"))) |
+    (secret_user_id == "2264-001" & between(date, as.Date("2025-04-21"),as.Date("2025-05-02")))
 )
 
 # removing those random assessments from the dataset
@@ -267,34 +244,73 @@ dat_clean <- dat_clean %>%
                                   (secret_user_id == "2163-001") |
                                   (secret_user_id == "2207-001"), 1, 0))
 
-# ---> Clean data sets
+------- # CLEANED DATA SETS
+  
 View(dat_clean)
 glimpse(dat_clean)
-# write_csv(dat_clean, "dat_clean_4.8.csv")
 
-ema_clean <- dat_clean %>% filter(saliva == 0) # EMA only
-saliva_clean <- dat_clean %>% filter(saliva == 1) # saliva only
+# Reading in previously cleaned dataset & aligning var types
+prev_cleaned <- read_csv("NIMH EMA Data/Cleaned data/dat_clean_4.7.csv")
 
-# All data to review
-to_review <- full_join(duplicates, unscheduled) %>% full_join(missing_random) %>%
-  full_join(empty_dates) %>%
-  arrange(secret_user_id, date) %>%
-  select(c("secret_user_id", "date", "activity_flow", "duplicate_assessments", "repeats", "unscheduled_assessments", "start_Time", "end_Time", "duration", "missing_random", "present", "absent", "empty_day"))
-View(to_review)
+prev_cleaned$since_food1 <- as.character(prev_cleaned$since_food1)
+prev_cleaned$since_food2 <- as.character(prev_cleaned$since_food2)
+prev_cleaned$since_food3 <- as.character(prev_cleaned$since_food3)
+prev_cleaned$since_food4 <- as.character(prev_cleaned$since_food4)
+prev_cleaned$since_food5 <- as.character(prev_cleaned$since_food5)
+prev_cleaned$since_had_drink_alcohol_type <- as.character(prev_cleaned$since_had_drink_alcohol_type)
+prev_cleaned$substances_tobacco <- as.character(prev_cleaned$substances_tobacco)
 
-# Exporting csvs of full data file and the rows that must be reviewed
-# write_csv(dat_ema_flow, "dat_ema_flow.csv")
-# write_csv(to_review, "to_review.csv")
+prev_cleaned$headache_location <- as.double(prev_cleaned$headache_location)
+prev_cleaned$headache_vision_change_time <- as.double(prev_cleaned$headache_vision_change_time)
+prev_cleaned$headache_confusing_time <- as.character(prev_cleaned$headache_confusing_time)
+prev_cleaned$headache_medication <- as.character(prev_cleaned$headache_medication)
+
+prev_cleaned$day_over_medication_why <- as.character(prev_cleaned$day_over_medication_why)
+prev_cleaned$day_problems_belly_symptoms <- as.character(prev_cleaned$day_problems_belly_symptoms)
+
+prev_cleaned$saliva_label <- as.character(prev_cleaned$saliva_label)
+
+# Merging this export with previously cleaned dataset
+dat_clean_full <- bind_rows(dat_clean, prev_cleaned) %>% arrange(secret_user_id, schedule_Time)
+View(dat_clean_full)
+
+# Final cleaning of merged dataset, to account for repeated observations that straddled prev export
+
+#### update this to be like "for any obs that are in both dat_clean and prev_cleaned"
+repeats <- dat_clean_full %>% 
+  group_by(secret_user_id, date, activity_flow) %>%
+  mutate(repeats = n()) %>%
+  filter(repeats != 1)
+View(repeats)
+
+repeats_to_remove <- dat_clean_full %>% filter(
+    (secret_user_id == "2179-001" & schedule_Time == as.POSIXct("2025-04-07 19:00:00", tz = "UTC") & is.na(start_Time)) |
+      (secret_user_id == "2179-001" & schedule_Time == as.POSIXct("2025-04-07 21:00:00", tz = "UTC") & is.na(start_Time)) |
+      (secret_user_id == "2243-001" & schedule_Time == as.POSIXct("2025-04-07 15:00:00", tz = "UTC") & is.na(start_Time)) |
+      (secret_user_id == "2243-001" & schedule_Time == as.POSIXct("2025-04-07 19:00:00", tz = "UTC") & is.na(start_Time)) |
+      (secret_user_id == "2264-001" & schedule_Time == as.POSIXct("2025-04-07 16:30:00", tz = "UTC") & is.na(start_Time)) |
+      (secret_user_id == "2264-001" & schedule_Time == as.POSIXct("2025-04-07 20:30:00", tz = "UTC") & is.na(start_Time))
+)
+
+dat_clean_full <- dat_clean_full %>% anti_join(repeats_to_remove)
+View(dat_clean_full)
+
+# Exporting csv of cleaned data
+# write_csv(dat_clean, "dat_clean_5.2.csv")
+
+
+ema_clean_full <- dat_clean_full %>% filter(saliva == 0) # EMA only
+saliva_clean_full <- dat_clean_full %>% filter(saliva == 1) # saliva only
 
 -------
 
 # SAMPLE-WIDE EMA SUMMARY
 
-ema_clean_forcomp <- ema_clean %>% filter(flag_tech == 0 & flag_dropout == 0) # excluding tech issues and drop-outs
+ema_clean_forcomp <- ema_clean_full %>% filter(flag_tech == 0 & flag_dropout == 0) # excluding tech issues and drop-outs
 ema_complete_forcomp <- ema_clean_forcomp %>% filter(completed == 1) # excluding incomplete EMA responses
 
 ## How many participants have completed the EMA to date?
-number_completed = length(unique(ema_clean$secret_user_id))
+number_completed = length(unique(ema_clean_full$secret_user_id))
 
 ## How many participants are considered in the compliance calculations? (excl tech issues and drop-outs)
 number_forcomp = length(unique(ema_clean_forcomp$secret_user_id))
@@ -304,6 +320,8 @@ total_compliance = 1 - sum(ema_clean_forcomp$missed)/nrow(ema_clean_forcomp)
 
 ## What is the total compliance for completed assessments?/What percent of assessments are fully completed?
 complete_compliance = nrow(ema_complete_forcomp)/nrow(ema_clean_forcomp)
+
+length(unique(ema_complete_forcomp$secret_user_id))
 
 ## On average, how long does it take participants to complete the EMA, in minutes?
 summary(ema_clean_forcomp$duration/60) # all surveys
@@ -318,9 +336,11 @@ sd(ema_complete_forcomp$duration, na.rm = TRUE)/60
 compliance_subj = ema_clean_forcomp %>% ## compliance by subject
   group_by(secret_user_id) %>% 
   summarise(pct_compliance=100-100*mean(missed), n=n()) %>%
-  arrange(pct_compliance) %>%
+  arrange(secret_user_id) %>%
   ungroup()
 View(compliance_subj)
+
+# write_csv(compliance_subj, "px_compliance.csv")
 
 ## What is the average compliance for a subject?
 avg_compliance = mean(compliance_subj$pct_compliance)
@@ -360,6 +380,42 @@ View(compliance_dow)
 
 -----
   
+  ------- # CLEANING
+  
+  # NUMBER OF ASSESSMENTS
+  # Expected total number of assessments for EMA: 60
+  # Expected total number of assessments for EMA + saliva: 76
+  # Expected number of normal Morning, Mid-Day, Afternoon, and Evening: 15
+  # Expected number of each assessment with saliva: 4
+  
+  assessments <- dat_flow %>% # number of each type of assessment for each participant
+  group_by(secret_user_id, activity_flow) %>% 
+  summarise(n=n()) %>%
+  arrange(n) %>%
+  ungroup()
+View(assessments)
+
+## Which subjects don't have the expected number of assessments?
+
+unexpected <- assessments %>% filter(activity_flow == "Morning Assessment" & n != 15 |
+                                       activity_flow == "Mid-day Assessment" & n != 15 |
+                                       activity_flow == "Afternoon Assessment" & n != 15 |
+                                       activity_flow == "Evening Assessment" & n != 15 |
+                                       activity_flow == "Evening Assessment (Female)" & n != 15 |
+                                       activity_flow == "Morning Assessment (with saliva)" & n != 4 |
+                                       activity_flow == "Mid-day Assessment (with saliva)" & n != 4 |
+                                       activity_flow == "Afternoon Assessment (with saliva)" & n != 4 |
+                                       activity_flow == "Evening Assessment (with saliva)" & n != 4 |
+                                       activity_flow == "Evening Assessment (Female; with saliva)" & n != 4) %>%
+  arrange(secret_user_id)
+View(unexpected) # all assessments with unexpected # of occurrences
+
+# to_review_ids <- unique(unexpected$secret_user_id) # participant IDs to review
+# 
+# to_review <- dat_flow %>% filter(secret_user_id %in% to_review_ids) %>%
+#   select(-c("userId", "event_id", "id")) # full data for the participants to review
+# View(to_review)
+
   # ## How many participants have too few assessments?
   # dat_ema_few <- assessments %>% filter(n < 60) %>% arrange(desc(n))
   # View(dat_ema_few)
