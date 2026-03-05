@@ -13,7 +13,7 @@
   + *ML_R&B_EMA.ipynb*: Original post-processing script for R&B EMA data, adapted from the Revised applet.
   + *ML_R&B_EMA_v2.ipynb*: Version 2 of the R&B EMA post-processing script to account for export changes made by MindLogger team in Spring 2025.
 + Quality control and compliance (R)
-  + *RnB_QC_Sample.R*: Original script for quality control and compliance calculation of R&B EMA data (after post-processing with ML_R&B_EMA_v2).
+  + *RnB_QC_Sample.R*: Original script for quality control and compliance calculation of R&B EMA and saliva data (after post-processing with ML_R&B_EMA_v2).
 
 ### Processing pipeline
 1. Export raw applet data from Mindlogger and save response.csv files (‘Input Files’ > 'EMA_applet_data').
