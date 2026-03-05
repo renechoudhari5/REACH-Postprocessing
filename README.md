@@ -20,6 +20,6 @@
 5. Run the "flow_final.csv" output file through the QC script stored in this Github repository (RnB_QC_Sample_v2.R)
 6. The QC script may flag observations that need to be reviewed. Follow instructions and example from this spreadsheet: https://docs.google.com/spreadsheets/d/1OtNgUgDHD3kM7j5szJLGK0Dumf4ijH-0Yrf7FvF4Gio/edit?usp=sharing. Document cases to be reviewed in a tracking spreadsheet, including solutions and notes ("Reviewing participants" tab ). Participants who need to be flagged for missing assessments, dropouts, or tech issues should be documented as well along with an explanation for the flag ("Flag cases" tab).
 7. Make the corresponding inclusion/exclusion changes in the QC script.
-8. Finish running the QC script and obtain compliance measures.
+8. Finish running the QC script and obtain compliance measures. You can see previous compliance statistics for R&B data in subsequent tabs on the above Google spreadsheet.
 9. Save the cleaned dataset and compliance report (‘Cleaned data’), along with the scripts used (‘Scripts’).
 10. If there are participants with compliance <25%, add them to ("Low comp px") sheet of the tracking spreadsheet and add any notes.
