@@ -10,3 +10,16 @@
 + *ML_R&B_EMA.ipynb*: This notebook is the first version of the R&B EMA post-processing script
 + + *HBN_EMA_Reformat.ipynb*: This notebook is the post-processing script reworked for the HBN EMA
 + *ML_EMA_Reformat_v2.ipynb*: This notebook is the original version of the post-processing script, which was designed for our test/dev EMA applet ("Revised NIMH EMA")
+
+### Processing pipeline
+
+1. Export raw applet data from Mindlogger and save response.csv files (‘Input Files’ > 'EMA_applet_data').
+2. [Only for R&B team] Export flow-items.csv, activity-schedule.csv, and flow-schedule.csv from Curious SFTP server and save (‘Input Files’).
+Run the Input Files through the post-processing script stored in this Github repository (ML_EMA_R&B_v3.ipynb)
+Save all output files (‘Output Files’).
+Run the "flow_final.csv" output file through the QC script stored in this Github repository (RnB_QC_Sample_v2.R)
+The QC script may flag observations that need to be reviewed. Follow instructions and example from this spreadsheet: https://docs.google.com/spreadsheets/d/1OtNgUgDHD3kM7j5szJLGK0Dumf4ijH-0Yrf7FvF4Gio/edit?usp=sharing. Document cases to be reviewed in a tracking spreadsheet, including solutions and notes ("Reviewing participants" tab ). Participants who need to be flagged for missing assessments, dropouts, or tech issues should be documented as well along with an explanation for the flag ("Flag cases" tab).
+Make the corresponding inclusion/exclusion changes in the QC script.
+Finish running the QC script and obtain compliance measures.
+Save the cleaned dataset and compliance report (‘Cleaned data’), along with the scripts used (‘Scripts’).
+If there are participants with compliance <25%, add them to ("Low comp px") sheet of the tracking spreadsheet and add any notes.
