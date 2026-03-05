@@ -2,9 +2,9 @@
 
 ### File Names
 + Post-processing (Python)
-+ + *ML_R&B_EMA_v3.ipynb*: Version 3 (most updated version) of the Python R&B EMA post-processing script. Can run both with and without the special SFTP files for the R&B study (to make it generalizable to other teams).
+  + *ML_R&B_EMA_v3.ipynb*: Version 3 (most updated version) of the Python R&B EMA post-processing script. Can run both with and without the special SFTP files for the R&B study (to make it generalizable to other teams).
 + Quality control and compliance (R)
-+ + *RnB_QC_Sample_v2.R*: Version 2 (most updated version) of the R script for quality control and compliance calculation (after post-processing with ML_R&B_EMA_v3). Cleans only EMA data (and not saliva data).
+  + *RnB_QC_Sample_v2.R*: Version 2 (most updated version) of the R script for quality control and compliance calculation (after post-processing with ML_R&B_EMA_v3). Cleans only EMA data (and not saliva data).
 
 ### Previous versions
 + Post-processing (Python)
