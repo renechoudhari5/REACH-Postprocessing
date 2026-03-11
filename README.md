@@ -2,16 +2,18 @@
 
 ### File Names
 + Post-processing (Python)
-  + *ML_R&B_EMA_v3.ipynb*: Version 3 (most updated version) of the Python R&B EMA post-processing script. Can run both with and without the special SFTP files for the R&B study (to make it generalizable to other teams).
+  + *ML_R&B_EMA_v3.ipynb*: Version 3 (most updated version) of the REACH EMA post-processing Python script. Can run both with and without the special SFTP files for the NIMH Rhythms & Blues study (to make it generalizable to other teams).
 + Quality control and compliance (R)
-  + *RnB_QC_Sample_v2.R*: Version 2 (most updated version) of the R script for quality control and compliance calculation (after post-processing with ML_R&B_EMA_v3). Cleans only EMA data (and not saliva data).
+  + *RnB_QC_Sample_v2.R*: Version 2 (most updated version) of the R script for quality control and compliance calculation (after post-processing with ML_R&B_EMA_v3). Cleans only EMA data (and not saliva or other supplemental data).
++ Codebook
+  + *REACH - FAV_Codebook.xlsx*: Codebook for Full Adult Version of REACH.
 
 ### Previous versions
 + Post-processing (Python)
-  + *ML_EMA_Reformat_v2.ipynb*: This notebook is the original version of the post-processing script, which was designed for our test/dev EMA applet ("Revised NIMH EMA").
-  + *HBN_EMA_Reformat.ipynb*: This notebook is the post-processing script reworked for the HBN EMA.
-  + *ML_R&B_EMA.ipynb*: Original post-processing script for R&B EMA data, adapted from the Revised applet.
-  + *ML_R&B_EMA_v2.ipynb*: Version 2 of the R&B EMA post-processing script to account for export changes made by MindLogger team in Spring 2025.
+  + *ML_EMA_Reformat_v2.ipynb*: Original version of the post-processing script, designed for NIMH test/dev EMA applet ("Revised NIMH EMA").
+  + *HBN_EMA_Reformat.ipynb*: Post-processing script reworked for the Healthy Brain Network (HBN) EMA.
+  + *ML_R&B_EMA.ipynb*: Original post-processing script for NIMH Rhythms & Blues EMA data, adapted from the Revised applet.
+  + *ML_R&B_EMA_v2.ipynb*: Version 2 of the NIMH R&B EMA post-processing script to account for export changes made by MindLogger/Curious team in Spring 2025.
 + Quality control and compliance (R)
   + *RnB_QC_Sample.R*: Original script for quality control and compliance calculation of R&B EMA and saliva data (after post-processing with ML_R&B_EMA_v2).
 
