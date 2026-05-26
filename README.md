@@ -20,3 +20,4 @@
    + Make any corresponding inclusion/exclusion changes in the R script.
    + Finish running the R script to obtain compliance metrics. If there are participants with compliance <25%, add them to ("Low comp px") sheet of the tracking spreadsheet and add any notes.
 7. After running the R script, the cleaned dataset and subject-level compliance report will automatically populate in 'Scripts' - move these files to 'Cleaned Data'.
+8. Save and timestamp your Python and R scripts under 'Scripts'. Duplicate these scripts for future exports.
