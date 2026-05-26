@@ -1,4 +1,4 @@
-# REACH-Postprocessing
+<img width="164" height="65" alt="image" src="https://github.com/user-attachments/assets/dd6e8824-bb17-4226-8555-d368a53a3890" /># REACH-Postprocessing
 
 ### File names
 + Processing (Python)
@@ -15,7 +15,7 @@
 3. Export raw applet data from Curious and save response.csv files (‘Input Files’ > 'EMA_applet_data').
 4. Create a schedule-history.csv file following the template provided in the Sample Data > 'Input Files' folder for the applicable version of REACH. Store in 'Input Files'.
    + Ensure the participant IDs in the _secret_user_id_ column match those in your data exactly.
-   + Enter start and end dates in YYYY-MM-DD format.
+   + Enter start and end dates in YYYY-MM-DD format. In Excel, you can use the following to automatically format entire columns: Ctrl+1 > Date > YYYY-MM-DD.
    + If participants completed more than one epoch of EMA, create separate rows for each epoch with corresponding start and end dates.
 6. Run the Python processing script using the files in 'Input Files'. The output will automatically populate in 'Output Files'.
 7. Run the R cleaning script using the 'flow_final.csv' file from 'Output Files', making updates as needed.
