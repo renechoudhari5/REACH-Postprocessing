@@ -4,7 +4,7 @@
 + Processing (Python)
   + *REACH - xxV_processing.ipynb*: Python script for processing EMA data for each version of REACH.
   + *REACH - xxV_processing_requirements.txt*: List of package requirements to run Python processing script.
-+ Quality control and compliance (R)
++ Cleaning, quality control, and compliance (R)
   + *REACH - xxV_QC.R*: R script for cleaning, quality control, and compliance calculations for each version of REACH.
 + Codebooks
   + *REACH - xxV_codebook.xlsx*: Codebook for all output variables for each version of REACH.
