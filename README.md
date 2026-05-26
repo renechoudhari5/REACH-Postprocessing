@@ -1,4 +1,4 @@
-<img width="164" height="65" alt="image" src="https://github.com/user-attachments/assets/dd6e8824-bb17-4226-8555-d368a53a3890" /># REACH-Postprocessing
+# REACH-Postprocessing
 
 ### File names
 + Processing (Python)
